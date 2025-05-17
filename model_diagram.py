@@ -66,7 +66,7 @@ all_plot_y_coords = [y_center_main_path]
 all_plot_z_coords = [z_level_main_path]
 
 # 1. Input Text
-label_input = "Input Text"
+label_input = "lightgreen block 1"
 pos_input = (x_curr, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_input, (block_height_std*0.8, block_width*0.8, block_depth), color_input, label_text=label_input)
 all_plot_x_coords.append(pos_input[0])
@@ -74,7 +74,7 @@ prev_block_output_connector = (pos_input[0] + (block_height_std*0.8)*0.5, pos_in
 x_curr += block_height_std * 2.5
 
 # 2. SentenceTransformer
-label_st = "Green block"
+label_st = "mediumseagreen block 1"
 pos_st = (x_curr, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_st, (block_height_std*1.5, block_width, block_depth), color_sent_transformer, label_text=label_st)
 draw_arrow(ax, prev_block_output_connector, (pos_st[0] - (block_height_std*1.5)*0.5, pos_st[1], pos_st[2]))
@@ -84,7 +84,7 @@ x_curr += block_height_std * 3.0
 
 # 3. FC Layers
 # FC1
-label_fc1 = "Blue Block 1"
+label_fc1 = "cornflowerblue block 1"
 pos_fc1 = (x_curr, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_fc1, (block_height_std, block_width, block_depth), color_fc, label_text=label_fc1)
 draw_arrow(ax, prev_block_output_connector, (pos_fc1[0] - block_height_std*0.5, pos_fc1[1], pos_fc1[2]))
@@ -93,7 +93,7 @@ prev_block_output_connector_fc = (pos_fc1[0] + block_height_std*0.5, pos_fc1[1],
 x_curr_fc = x_curr + block_height_std * 2.0
 
 # ReLU
-label_relu1 = "Yellow block"
+label_relu1 = "khaki block 1"
 pos_relu1 = (x_curr_fc, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_relu1, (block_height_std*0.5, block_width*0.8, block_depth*0.8), color_relu, label_text=label_relu1)
 draw_arrow(ax, prev_block_output_connector_fc, (pos_relu1[0] - (block_height_std*0.5)*0.5, pos_relu1[1], pos_relu1[2]))
@@ -102,7 +102,7 @@ prev_block_output_connector_fc = (pos_relu1[0] + (block_height_std*0.5)*0.5, pos
 x_curr_fc += block_height_std * 1.75
 
 # FC2
-label_fc2 = "Blue block 2"
+label_fc2 = "cornflowerblue block 2"
 pos_fc2 = (x_curr_fc, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_fc2, (block_height_std, block_width, block_depth), color_fc, label_text=label_fc2)
 draw_arrow(ax, prev_block_output_connector_fc, (pos_fc2[0] - block_height_std*0.5, pos_fc2[1], pos_fc2[2]))
@@ -111,13 +111,21 @@ prev_block_output_connector = (pos_fc2[0] + block_height_std*0.5, pos_fc2[1], po
 x_curr = x_curr_fc + block_height_std * 2.5
 
 # 4. Reshape (conceptual)
-label_reshape = "Grey block"
+label_reshape = "lightgrey block 1"
 pos_reshape = (x_curr, y_center_main_path, z_level_main_path)
 draw_cuboid(ax, pos_reshape, (block_height_std*0.7, block_width*0.7, block_depth*0.7), color_reshape, label_text=label_reshape, fontsize=6)
 draw_arrow(ax, prev_block_output_connector, (pos_reshape[0] - (block_height_std*0.7)*0.5, pos_reshape[1], pos_reshape[2]))
 all_plot_x_coords.append(pos_reshape[0])
 # Connector for the first ladder rung, from Reshape output
 current_ladder_input_connector = (pos_reshape[0] + (block_height_std*0.7)*0.5, pos_reshape[1], pos_reshape[2])
+
+# Initialize counters for block colors
+color_counters = {
+    "salmon": 0,
+    "steelblue": 0,
+    "mediumpurple": 0,
+    "lightcoral": 0,
+}
 
 # 5. Upsampling Blocks (Ladder Structure going UP in Z)
 upblock_configs = [
@@ -159,7 +167,8 @@ for i, conf in enumerate(upblock_configs):
     all_plot_x_coords.append(actual_x_tconv_center)
 
     # ConvTranspose2d
-    label_tconv = f"random block (Up {i})\\n{conf['in_c']}->{conf['out_c_tconv']}\\nOut: ({conf['out_c_tconv']}, {conf['spatial_factor']})"
+    color_counters["salmon"] += 1
+    label_tconv = f"salmon block {color_counters['salmon']}"
     pos_tconv = (actual_x_tconv_center, y_ladder_depth, z_ladder_current_level)
     draw_cuboid(ax, pos_tconv, (block_height_std, block_width, block_depth), color_conv_transpose, label_text=label_tconv)
     
@@ -168,7 +177,8 @@ for i, conf in enumerate(upblock_configs):
         tconv_input_connection_point = (pos_tconv[0] - block_height_std*0.5, pos_tconv[1], pos_tconv[2]) # Center of left face
     else:
         tconv_input_connect_z = pos_tconv[2] - block_depth*0.5 # Z-coordinate of the bottom face
-        tconv_input_connection_point = (pos_tconv[0] - block_height_std*0.5, pos_tconv[1], tconv_input_connect_z) # Bottom-center of left face
+        # MODIFIED: Connect to the center of the bottom face
+        tconv_input_connection_point = (pos_tconv[0], pos_tconv[1], tconv_input_connect_z) # Center of bottom face
 
     # Arrow logic for U-Net skip connection style
     if i == 0:
@@ -184,10 +194,12 @@ for i, conf in enumerate(upblock_configs):
     all_plot_x_coords.append(actual_x_conv_center)
 
     if "final_act" not in conf:
-        label_conv = f"Sequential Conv (Up {i})\\nReLU, Conv2d({conf['out_c_tconv']}->{conf['out_c_conv']}), ReLU\\nOut: ({conf['out_c_conv']}, {conf['spatial_factor']})"
+        color_counters["steelblue"] += 1
+        label_conv = f"steelblue block {color_counters['steelblue']}"
         color_seq = color_conv_block
     else:
-        label_conv = f"{conf['final_act']} (Up {i})\\nOut: ({conf['out_c_conv']}, {conf['spatial_factor']})"
+        color_counters["mediumpurple"] += 1
+        label_conv = f"mediumpurple block {color_counters['mediumpurple']}"
         color_seq = color_tanh
     draw_cuboid(ax, pos_conv, (block_height_std, block_width, block_depth), color_seq, label_text=label_conv)
     
@@ -197,7 +209,8 @@ for i, conf in enumerate(upblock_configs):
     draw_arrow(ax, arrow_start_tconv_out, arrow_end_conv_in, arrowstyle='->') # Ensure single-sided
     
     # Codebook for this stage
-    cb_label = f" {conf['id']}\\FC(512, {conf['out_c_conv']})" # Ensured newline is correct
+    color_counters["lightcoral"] += 1
+    cb_label = f"lightcoral block {color_counters['lightcoral']}"
     # Position Codebook: X forward of Conv/Tanh, Y aligned with ladder, Z is same as Conv/Tanh
     cb_pos = (actual_x_codebook_center, y_ladder_depth, z_ladder_current_level) # MODIFIED: Y aligned with ladder
     draw_cuboid(ax, cb_pos, (block_height_std*0.8, block_width*0.7, block_depth*0.8), color_codebook, label_text=cb_label)
